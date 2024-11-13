@@ -499,7 +499,18 @@ class OrderProcessService
         }
         $carmisInfo = array_column($carmis, 'carmi');
         $ids = array_column($carmis, 'id');
-        $order->info = implode(PHP_EOL, $carmisInfo);
+
+        // 获取订单ID
+        $orderId = $order->order_sn; // 假设订单ID存储在 order_sn 字段中
+        // 遍历卡密信息，将 {{orderid}} 替换为实际的订单ID
+        $carmisInfoWithOrderId = array_map(function($carmi) use ($orderId) {
+            // 检查并替换 {{orderid}} 占位符为订单ID
+            return str_replace('{{orderid}}', $orderId, $carmi);
+        }, $carmisInfo);
+
+        // 将处理后的卡密信息数组拼接成字符串
+        $order->info = implode(PHP_EOL, $carmisInfoWithOrderId);
+        //$order->info = implode(PHP_EOL, $carmisInfo);
         $order->status = Order::STATUS_COMPLETED;
         $order->save();
         // 将卡密设置为已售出
